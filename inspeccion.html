@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTI - Inspección de Sitio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .section-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .section-tab { padding: 10px 16px; border: 1px solid var(--gray-300); border-radius: 8px; background: white; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; color: var(--gray-600); }
+        .section-tab:hover { border-color: var(--primary); color: var(--primary); }
+        .section-tab.active { background: var(--primary); border-color: var(--primary); color: white; }
+        .insp-section { display: none; }
+        .insp-section.active { display: block; }
+        .insp-category { background: white; border: 1px solid var(--gray-200); border-radius: 14px; margin-bottom: 16px; overflow: hidden; }
+        .insp-category-header { padding: 14px 18px; background: var(--gray-50); border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; }
+        .insp-category-title { font-size: 14px; font-weight: 700; color: var(--gray-800); }
+        .insp-category-count { font-size: 11px; font-weight: 600; padding: 4px 10px; background: var(--gray-200); border-radius: 20px; color: var(--gray-600); }
+        .insp-item { padding: 14px 18px; border-bottom: 1px solid var(--gray-100); }
+        .insp-item:last-child { border-bottom: none; }
+        .insp-item-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+        .insp-item-number { font-size: 12px; font-weight: 700; color: var(--gray-400); min-width: 36px; }
+        .insp-item-name { font-size: 14px; font-weight: 500; color: var(--gray-800); flex: 1; }
+        .insp-item-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-left: 48px; }
+        .status-group { display: flex; border: 1px solid var(--gray-300); border-radius: 8px; overflow: hidden; }
+        .status-opt { padding: 8px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; border-right: 1px solid var(--gray-200); background: white; color: var(--gray-600); }
+        .status-opt:last-child { border-right: none; }
+        .status-opt:hover { background: var(--gray-50); }
+        .status-opt.bueno.active { background: var(--success); color: white; }
+        .status-opt.regular.active { background: var(--warning); color: #000; }
+        .status-opt.malo.active { background: var(--danger); color: white; }
+        .status-opt.na.active { background: var(--gray-500); color: white; }
+        .obs-input { flex: 1; min-width: 180px; }
+        .obs-input input { width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid var(--gray-300); border-radius: 8px; font-family: inherit; }
+        .obs-input input:focus { outline: none; border-color: var(--primary); }
+        @media (max-width: 600px) { .insp-item-controls { margin-left: 0; flex-direction: column; } .status-group { width: 100%; } .status-opt { flex: 1; text-align: center; padding: 10px 8px; } }
+    </style>
+</head>
+<body>
+    <div class="toast" id="toast"></div>
+    <header class="form-header">
+        <div class="form-header-top">
+            <div class="form-header-left">
+                <a href="index.html" class="back-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></a>
+                <div class="form-header-logo">
+                    <div class="form-header-icon">PTI</div>
+                    <div><div class="form-header-title">Phoenix Tower International</div><div class="form-header-subtitle">Inspección de Sitio - Checklist</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="progress-section">
+            <div class="progress-header"><span class="progress-label">Progreso de inspección</span><span class="progress-value" id="progress-percent">0%</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+            <div class="progress-stats">
+                <div class="progress-stat"><span class="stat-dot complete"></span><span id="stat-complete">0</span> evaluados</div>
+                <div class="progress-stat"><span class="stat-dot pending"></span><span id="stat-pending">0</span> pendientes</div>
+            </div>
+        </div>
+    </header>
+    <main class="form-main">
+        <div class="info-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div><div class="info-banner-title">Checklist de Inspección</div><div class="info-banner-text">Evalúe cada elemento seleccionando su estado (Bueno, Regular, Malo, N/A) y agregue observaciones cuando sea necesario.</div></div>
+        </div>
+        <div class="section-tabs">
+            <button class="section-tab active" data-section="general" onclick="switchSection('general')">Info General</button>
+            <button class="section-tab" data-section="sitio" onclick="switchSection('sitio')">Inspección Sitio</button>
+            <button class="section-tab" data-section="torre" onclick="switchSection('torre')">Inspección Torre</button>
+        </div>
+        <div class="insp-section active" id="section-general">
+            <div class="card">
+                <div class="card-header"><h2 class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>Información del Sitio</h2></div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="form-group"><label class="label">Proveedor<span class="required">*</span></label><input type="text" class="input" id="proveedor" placeholder="Nombre del proveedor"></div>
+                        <div class="form-group"><label class="label">Nombre del Sitio<span class="required">*</span></label><input type="text" class="input" id="nombre-sitio" placeholder="Nombre del sitio"></div>
+                        <div class="form-group"><label class="label">Número del Sitio<span class="required">*</span></label><input type="text" class="input" id="numero-sitio" placeholder="Ej: PTI-CR-001"></div>
+                        <div class="form-group"><label class="label">Tipo de Sitio</label><select class="select" id="tipo-sitio"><option value="">Seleccione...</option><option value="Urbano">Urbano</option><option value="Rural">Rural</option><option value="Rawland">Rawland</option><option value="Rooftop">Rooftop</option></select></div>
+                        <div class="form-group"><label class="label">Latitud</label><div class="input-group"><input type="text" class="input" id="latitud" placeholder="Ej: 9.934739" readonly><button type="button" class="icon-btn" onclick="getLocation()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+                        <div class="form-group"><label class="label">Longitud</label><input type="text" class="input" id="longitud" placeholder="Ej: -84.087502" readonly></div>
+                        <div class="form-group"><label class="label">Fecha de Inicio<span class="required">*</span></label><input type="date" class="input" id="fecha-inicio"></div>
+                        <div class="form-group"><label class="label">Hora de Entrada<span class="required">*</span></label><input type="time" class="input" id="hora-entrada"></div>
+                        <div class="form-group"><label class="label">Tipo de Torre</label><select class="select" id="tipo-torre"><option value="">Seleccione...</option><option value="Auto soportada">Auto soportada</option><option value="Arriostrada">Arriostrada</option><option value="Monopolo">Monopolo</option><option value="Mastil">Mastil</option></select></div>
+                        <div class="form-group"><label class="label">Altura de Torre (m)</label><input type="number" class="input" id="altura-torre" placeholder="Ej: 45"></div>
+                        <div class="form-group form-group-full"><label class="label">Dirección</label><input type="text" class="input" id="direccion" placeholder="Dirección completa del sitio"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h2 class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Fotografías del Sitio</h2></div>
+                <div class="card-body">
+                    <div class="photo-grid">
+                        <div class="photo-upload"><div class="photo-label"><span class="photo-required"></span>Foto Torre Completa</div><div class="photo-box" id="photo-torre-box" onclick="document.getElementById('photo-torre').click()"><svg class="photo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="photo-text">Tomar foto</div></div><input type="file" id="photo-torre" accept="image/*" capture="environment" class="hidden" onchange="handlePhoto(event, 'torre')"></div>
+                        <div class="photo-upload"><div class="photo-label"><span class="photo-required"></span>Foto Acceso/Candado</div><div class="photo-box" id="photo-acceso-box" onclick="document.getElementById('photo-acceso').click()"><svg class="photo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="photo-text">Tomar foto</div></div><input type="file" id="photo-acceso" accept="image/*" capture="environment" class="hidden" onchange="handlePhoto(event, 'acceso')"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="insp-section" id="section-sitio"><div id="sitio-categories"></div></div>
+        <div class="insp-section" id="section-torre"><div id="torre-categories"></div></div>
+        <button type="button" class="submit-btn" onclick="generateReport()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Generar Reporte de Inspección</button>
+    </main>
+    <script src="js/inspeccion.js"></script>
+</body>
+</html>
