@@ -87,9 +87,19 @@
             </div>
             <div class="card-body">
                 <div class="form-grid">
-                    <div class="form-group">
-                        <label class="label">Proveedor<span class="required">*</span><button class="tooltip-btn" title="Nombre de la empresa contratista">?</button></label>
-                        <input type="text" class="input" id="proveedor" placeholder="Ej: Servicios Torres CR">
+                    <div class="form-group" id="fg-proveedor">
+                        <label class="label">
+                            Proveedor<span class="required">*</span>
+                            <span class="tooltip-wrapper">
+                                <button type="button" class="tooltip-btn">?</button>
+                                <span class="tooltip-content">Nombre de la empresa contratista que realiza el mantenimiento</span>
+                            </span>
+                        </label>
+                        <input type="text" class="input" id="proveedor" placeholder="Ej: Servicios Torres CR" data-required="true">
+                        <div class="input-error-msg">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            Por favor ingrese el nombre del proveedor
+                        </div>
                     </div>
                     <div class="form-group">
                         <label class="label">Logo del Proveedor</label>
@@ -100,16 +110,36 @@
                         <img class="logo-preview hidden" id="logo-preview" onclick="removeLogo()">
                         <input type="file" id="logo-input" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
                     </div>
-                    <div class="form-group">
-                        <label class="label">ID Sitio<span class="required">*</span><button class="tooltip-btn" title="Código único asignado por PTI">?</button></label>
-                        <input type="text" class="input" id="id-sitio" placeholder="Ej: PTI-CR-001">
+                    <div class="form-group" id="fg-id-sitio">
+                        <label class="label">
+                            ID Sitio<span class="required">*</span>
+                            <span class="tooltip-wrapper">
+                                <button type="button" class="tooltip-btn">?</button>
+                                <span class="tooltip-content">Código único asignado por PTI para identificar el sitio</span>
+                            </span>
+                        </label>
+                        <input type="text" class="input" id="id-sitio" placeholder="Ej: PTI-CR-001" data-required="true">
+                        <div class="input-error-msg">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            Por favor ingrese el ID del sitio
+                        </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" id="fg-nombre-sitio">
                         <label class="label">Nombre del Sitio<span class="required">*</span></label>
-                        <input type="text" class="input" id="nombre-sitio" placeholder="Ej: San José Centro">
+                        <input type="text" class="input" id="nombre-sitio" placeholder="Ej: San José Centro" data-required="true">
+                        <div class="input-error-msg">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            Por favor ingrese el nombre del sitio
+                        </div>
                     </div>
                     <div class="form-group form-group-full">
-                        <label class="label">Tipo de Visita<span class="required">*</span><button class="tooltip-btn" title="Motivo principal de la visita">?</button></label>
+                        <label class="label">
+                            Tipo de Visita<span class="required">*</span>
+                            <span class="tooltip-wrapper">
+                                <button type="button" class="tooltip-btn">?</button>
+                                <span class="tooltip-content">Seleccione el motivo principal de la visita al sitio</span>
+                            </span>
+                        </label>
                         <select class="select" id="tipo-visita">
                             <option value="Mantenimiento Preventivo">Mantenimiento Preventivo</option>
                             <option value="Mantenimiento Correctivo">Mantenimiento Correctivo</option>
@@ -117,27 +147,41 @@
                             <option value="Emergencia">Emergencia</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" id="fg-fecha">
                         <label class="label">Fecha<span class="required">*</span></label>
-                        <input type="date" class="input" id="fecha">
+                        <input type="date" class="input" id="fecha" data-required="true">
+                        <div class="input-error-msg">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            Por favor seleccione la fecha
+                        </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" id="fg-hora">
                         <label class="label">Hora<span class="required">*</span></label>
-                        <input type="time" class="input" id="hora">
+                        <input type="time" class="input" id="hora" data-required="true">
+                        <div class="input-error-msg">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            Por favor seleccione la hora
+                        </div>
                     </div>
                     <div class="form-group form-group-full">
-                        <label class="label">Coordenadas GPS<button class="tooltip-btn" title="Presione el botón para capturar automáticamente">?</button></label>
+                        <label class="label">
+                            Coordenadas GPS
+                            <span class="tooltip-wrapper">
+                                <button type="button" class="tooltip-btn">?</button>
+                                <span class="tooltip-content">Presione el botón de ubicación para capturar automáticamente las coordenadas GPS del dispositivo</span>
+                            </span>
+                        </label>
                         <div class="input-group">
                             <input type="text" class="input" id="coordenadas" placeholder="Latitud, Longitud" readonly>
                             <button type="button" class="icon-btn" id="gps-btn" onclick="getLocation()">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
                             </button>
                         </div>
-                        <div class="input-hint">Presione el botón para capturar ubicación automáticamente</div>
+                        <div class="input-hint">Presione el botón para capturar su ubicación actual</div>
                     </div>
                     <div class="form-group form-group-full">
                         <label class="label">Dirección del Sitio</label>
-                        <input type="text" class="input" id="direccion" placeholder="Dirección física completa">
+                        <input type="text" class="input" id="direccion" placeholder="Dirección física completa del sitio">
                     </div>
                 </div>
             </div>

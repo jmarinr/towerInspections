@@ -79,6 +79,29 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('fecha').value = now.toISOString().split('T')[0];
     document.getElementById('hora').value = now.toTimeString().slice(0,5);
     renderActivities();
+    
+    // Add validation listeners for required fields
+    const requiredFields = ['proveedor', 'id-sitio', 'nombre-sitio', 'fecha', 'hora'];
+    requiredFields.forEach(id => {
+        const input = document.getElementById(id);
+        const fg = input.closest('.form-group');
+        
+        input.addEventListener('blur', () => {
+            if (!input.value.trim()) {
+                fg.classList.add('has-error');
+                fg.classList.remove('has-success');
+            } else {
+                fg.classList.remove('has-error');
+                fg.classList.add('has-success');
+            }
+        });
+        
+        input.addEventListener('input', () => {
+            if (input.value.trim()) {
+                fg.classList.remove('has-error');
+            }
+        });
+    });
 });
 
 // Toast
@@ -114,6 +137,7 @@ function renderActivities() {
         const isComplete = state.status === 'complete' && state.photoBefore && state.photoAfter;
         const isNA = state.status === 'na';
         const isOpen = expandedId === act.id;
+        const needsPhotos = state.status === 'complete' && (!state.photoBefore || !state.photoAfter);
         
         return `
         <div class="activity-item ${isComplete ? 'complete' : ''} ${isNA ? 'na' : ''}">
@@ -124,8 +148,8 @@ function renderActivities() {
                     <div class="activity-location">${act.location}</div>
                 </div>
                 <div class="activity-badges">
-                    ${state.photoBefore ? '<div class="photo-badge before"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>' : ''}
-                    ${state.photoAfter ? '<div class="photo-badge after"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>' : ''}
+                    ${state.photoBefore ? '<div class="photo-badge before" title="Foto ANTES capturada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="9 11 12 14 22 4"/></svg></div>' : ''}
+                    ${state.photoAfter ? '<div class="photo-badge after" title="Foto DESPUÉS capturada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="9 11 12 14 22 4"/></svg></div>' : ''}
                 </div>
                 <svg class="activity-arrow ${isOpen ? 'open' : ''}" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
@@ -142,36 +166,114 @@ function renderActivities() {
                 </div>
                 
                 <div class="${state.status === 'complete' ? '' : 'hidden'}" id="photos-${act.id}">
+                    ${needsPhotos ? `
+                    <div class="info-banner" style="margin-bottom:16px;background:#FEF3C7;border-color:rgba(245,158,11,0.3)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" style="width:20px;height:20px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <div style="color:#92400E"><strong>Fotos requeridas</strong><br>Debe agregar foto ANTES y DESPUÉS para completar esta actividad</div>
+                    </div>
+                    ` : ''}
                     <div class="photo-grid">
-                        <div class="photo-upload">
-                            <div class="photo-label"><span class="photo-required"></span>Foto ANTES</div>
-                            <div class="photo-box ${state.photoBefore ? 'filled' : ''}" onclick="event.stopPropagation(); ${state.photoBefore ? `removePhoto(${act.id}, 'before')` : `document.getElementById('photo-before-${act.id}').click()`}">
-                                ${state.photoBefore ? 
-                                    `<img src="${state.photoBefore}" class="photo-preview"><div class="photo-overlay"><span class="photo-overlay-text">Eliminar</span></div>` :
-                                    `<svg class="photo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="photo-text">Tomar foto</div><div class="photo-hint">antes del trabajo</div>`
-                                }
+                        <div class="photo-upload ${!state.photoBefore && state.status === 'complete' ? 'has-error' : ''}" id="photo-upload-before-${act.id}">
+                            <div class="photo-label">
+                                <span class="photo-label-badge before">ANTES</span>
+                                Foto del área
+                                <span class="photo-required-dot"></span>
+                            </div>
+                            <div class="photo-box ${state.photoBefore ? 'filled before-type' : ''}" onclick="event.stopPropagation(); ${state.photoBefore ? '' : `document.getElementById('photo-before-${act.id}').click()`}">
+                                ${state.photoBefore ? `
+                                    <div class="photo-preview-wrapper">
+                                        <img src="${state.photoBefore}" class="photo-preview">
+                                        <div class="photo-type-badge before">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                            ANTES
+                                        </div>
+                                        <div class="photo-overlay">
+                                            <button class="photo-overlay-btn change" onclick="event.stopPropagation(); document.getElementById('photo-before-${act.id}').click()">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                                Cambiar
+                                            </button>
+                                            <button class="photo-overlay-btn delete" onclick="event.stopPropagation(); removePhoto(${act.id}, 'before')">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                                Eliminar
+                                            </button>
+                                        </div>
+                                    </div>
+                                ` : `
+                                    <div class="photo-icon-wrapper">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                    </div>
+                                    <div class="photo-text">Tomar foto ANTES</div>
+                                    <div class="photo-hint">Capture el estado actual antes de iniciar el trabajo</div>
+                                    <div class="photo-hint-tap">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                                        Toque para abrir cámara
+                                    </div>
+                                `}
                             </div>
                             <input type="file" id="photo-before-${act.id}" accept="image/*" capture="environment" class="hidden" onchange="handlePhoto(event, ${act.id}, 'before')">
+                            <div class="photo-error-msg">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                Debe agregar la foto ANTES del trabajo
+                            </div>
                         </div>
-                        <div class="photo-upload">
-                            <div class="photo-label"><span class="photo-required"></span>Foto DESPUÉS</div>
-                            <div class="photo-box ${state.photoAfter ? 'filled' : ''}" onclick="event.stopPropagation(); ${state.photoAfter ? `removePhoto(${act.id}, 'after')` : `document.getElementById('photo-after-${act.id}').click()`}">
-                                ${state.photoAfter ? 
-                                    `<img src="${state.photoAfter}" class="photo-preview"><div class="photo-overlay"><span class="photo-overlay-text">Eliminar</span></div>` :
-                                    `<svg class="photo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="photo-text">Tomar foto</div><div class="photo-hint">después del trabajo</div>`
-                                }
+                        <div class="photo-upload ${!state.photoAfter && state.status === 'complete' ? 'has-error' : ''}" id="photo-upload-after-${act.id}">
+                            <div class="photo-label">
+                                <span class="photo-label-badge after">DESPUÉS</span>
+                                Foto del área
+                                <span class="photo-required-dot"></span>
+                            </div>
+                            <div class="photo-box ${state.photoAfter ? 'filled after-type' : ''}" onclick="event.stopPropagation(); ${state.photoAfter ? '' : `document.getElementById('photo-after-${act.id}').click()`}">
+                                ${state.photoAfter ? `
+                                    <div class="photo-preview-wrapper">
+                                        <img src="${state.photoAfter}" class="photo-preview">
+                                        <div class="photo-type-badge after">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                            DESPUÉS
+                                        </div>
+                                        <div class="photo-overlay">
+                                            <button class="photo-overlay-btn change" onclick="event.stopPropagation(); document.getElementById('photo-after-${act.id}').click()">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                                Cambiar
+                                            </button>
+                                            <button class="photo-overlay-btn delete" onclick="event.stopPropagation(); removePhoto(${act.id}, 'after')">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                                Eliminar
+                                            </button>
+                                        </div>
+                                    </div>
+                                ` : `
+                                    <div class="photo-icon-wrapper">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                    </div>
+                                    <div class="photo-text">Tomar foto DESPUÉS</div>
+                                    <div class="photo-hint">Capture el resultado después de completar el trabajo</div>
+                                    <div class="photo-hint-tap">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                                        Toque para abrir cámara
+                                    </div>
+                                `}
                             </div>
                             <input type="file" id="photo-after-${act.id}" accept="image/*" capture="environment" class="hidden" onchange="handlePhoto(event, ${act.id}, 'after')">
+                            <div class="photo-error-msg">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                Debe agregar la foto DESPUÉS del trabajo
+                            </div>
                         </div>
                     </div>
-                    <div style="margin-top:12px">
-                        <label class="label">Observaciones</label>
-                        <textarea class="textarea" placeholder="Describa el trabajo realizado..." onclick="event.stopPropagation()" onchange="updateObs(${act.id}, this.value)">${state.obs || ''}</textarea>
+                    <div style="margin-top:16px">
+                        <label class="label">Observaciones (opcional)</label>
+                        <textarea class="textarea" placeholder="Describa detalles adicionales del trabajo realizado..." onclick="event.stopPropagation()" onchange="updateObs(${act.id}, this.value)">${state.obs || ''}</textarea>
                     </div>
                 </div>
                 
                 <div class="${state.status === 'na' ? '' : 'hidden'}" id="reason-${act.id}">
-                    <label class="label">Motivo por el cual no aplica</label>
+                    <label class="label">
+                        Motivo por el cual no aplica
+                        <span class="tooltip-wrapper">
+                            <button type="button" class="tooltip-btn">?</button>
+                            <span class="tooltip-content">Explique brevemente por qué esta actividad no es aplicable a este sitio</span>
+                        </span>
+                    </label>
                     <input type="text" class="input" placeholder="Ej: No hay malla ciclónica en este sitio..." onclick="event.stopPropagation()" value="${state.reason || ''}" onchange="updateReason(${act.id}, this.value)">
                 </div>
             </div>
@@ -321,6 +423,39 @@ function getLocation() {
 
 // Generate Report
 function generateReport() {
+    // Validate required fields
+    let hasErrors = false;
+    const requiredFields = [
+        { id: 'proveedor', fg: 'fg-proveedor' },
+        { id: 'id-sitio', fg: 'fg-id-sitio' },
+        { id: 'nombre-sitio', fg: 'fg-nombre-sitio' },
+        { id: 'fecha', fg: 'fg-fecha' },
+        { id: 'hora', fg: 'fg-hora' }
+    ];
+    
+    requiredFields.forEach(field => {
+        const input = document.getElementById(field.id);
+        const fg = document.getElementById(field.fg);
+        if (!input.value.trim()) {
+            fg.classList.add('has-error');
+            fg.classList.remove('has-success');
+            hasErrors = true;
+        } else {
+            fg.classList.remove('has-error');
+            fg.classList.add('has-success');
+        }
+    });
+    
+    if (hasErrors) {
+        showToast('Por favor complete todos los campos obligatorios', 'error');
+        // Scroll to first error
+        const firstError = document.querySelector('.form-group.has-error');
+        if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+    }
+    
     const data = {
         siteType,
         proveedor: document.getElementById('proveedor').value,
@@ -331,7 +466,8 @@ function generateReport() {
         hora: document.getElementById('hora').value,
         coordenadas: document.getElementById('coordenadas').value,
         direccion: document.getElementById('direccion').value,
-        activities: activityStates
+        activities: activityStates,
+        generatedAt: new Date().toISOString()
     };
     
     console.log('Report Data:', data);

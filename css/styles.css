@@ -149,10 +149,98 @@ body {
 .form-group-full { grid-column: 1 / -1; }
 .label { display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--gray-700); margin-bottom: 6px; }
 .required { color: var(--danger); margin-left: 2px; }
+/* Tooltip System */
+.tooltip-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
 .tooltip-btn {
-    width: 16px; height: 16px; border-radius: 50%; background: var(--gray-200);
-    border: none; color: var(--gray-500); font-size: 10px; font-weight: 700;
-    margin-left: 6px; cursor: help; display: inline-flex; align-items: center; justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--gray-200);
+    border: none;
+    color: var(--gray-500);
+    font-size: 10px;
+    font-weight: 700;
+    margin-left: 6px;
+    cursor: help;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+.tooltip-btn:hover {
+    background: var(--primary);
+    color: white;
+}
+.tooltip-content {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gray-900);
+    color: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    white-space: nowrap;
+    max-width: 280px;
+    white-space: normal;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    pointer-events: none;
+}
+.tooltip-content::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--gray-900);
+}
+.tooltip-wrapper:hover .tooltip-content {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Error Messages */
+.input-error-msg {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: var(--danger-light);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--danger);
+}
+.input-error-msg svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+.form-group.has-error .input-error-msg {
+    display: flex;
+}
+.form-group.has-error .input,
+.form-group.has-error .select {
+    border-color: var(--danger);
+    background: #FEF2F2;
+}
+.form-group.has-success .input,
+.form-group.has-success .select {
+    border-color: var(--success);
 }
 .input, .select, .textarea {
     width: 100%;
@@ -289,27 +377,187 @@ body {
 .status-btn.active-complete { background: var(--primary); border-color: var(--primary); color: white; }
 .status-btn.active-na { background: var(--gray-500); border-color: var(--gray-500); color: white; }
 
-/* Photo Upload */
-.photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-.photo-label { font-size: 11px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
-.photo-required { width: 5px; height: 5px; background: var(--danger); border-radius: 50%; }
+/* Photo Upload - Enhanced */
+.photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.photo-upload { position: relative; }
+.photo-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.photo-label-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+.photo-label-badge.before {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--info);
+}
+.photo-label-badge.after {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+}
+.photo-required-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--danger);
+    border-radius: 50%;
+    margin-left: auto;
+}
 .photo-box {
     border: 2px dashed var(--gray-300);
-    border-radius: var(--radius-lg);
-    padding: 24px 12px;
+    border-radius: 12px;
+    padding: 20px 16px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
-    background: white;
+    background: linear-gradient(to bottom, white, var(--gray-50));
     position: relative;
     overflow: hidden;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
-.photo-box:hover { border-color: var(--primary); background: var(--gray-50); }
-.photo-box.filled { border: 2px solid var(--success); padding: 0; }
-.photo-icon { width: 32px; height: 32px; margin: 0 auto 8px; color: var(--gray-400); }
-.photo-text { font-size: 13px; color: var(--gray-600); font-weight: 500; }
-.photo-hint { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
-.photo-preview { width: 100%; height: 100px; object-fit: cover; }
+.photo-box:hover {
+    border-color: var(--primary);
+    background: linear-gradient(to bottom, white, rgba(15, 42, 74, 0.03));
+}
+.photo-box.filled {
+    border: 2px solid var(--success);
+    padding: 0;
+    background: white;
+}
+.photo-box.filled.before-type { border-color: var(--info); }
+.photo-box.filled.after-type { border-color: var(--success); }
+.photo-icon-wrapper {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 12px;
+    padding: 12px;
+    background: var(--gray-100);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.photo-box:hover .photo-icon-wrapper {
+    background: rgba(15, 42, 74, 0.1);
+}
+.photo-icon-wrapper svg {
+    width: 28px;
+    height: 28px;
+    color: var(--gray-400);
+}
+.photo-box:hover .photo-icon-wrapper svg {
+    color: var(--primary);
+}
+.photo-text {
+    font-size: 14px;
+    color: var(--gray-700);
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.photo-hint {
+    font-size: 12px;
+    color: var(--gray-500);
+    line-height: 1.4;
+}
+.photo-hint-tap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: var(--gray-100);
+    border-radius: 20px;
+    font-size: 11px;
+    color: var(--gray-500);
+}
+.photo-hint-tap svg {
+    width: 14px;
+    height: 14px;
+}
+.photo-preview-wrapper {
+    position: relative;
+    width: 100%;
+    height: 150px;
+}
+.photo-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+.photo-type-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.photo-type-badge.before { background: var(--info); color: white; }
+.photo-type-badge.after { background: var(--success); color: white; }
+.photo-type-badge svg { width: 12px; height: 12px; }
+.photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.3));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    border-radius: 10px;
+}
+.photo-box.filled:hover .photo-overlay { opacity: 1; }
+.photo-overlay-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.2s;
+}
+.photo-overlay-btn.change { background: white; color: var(--gray-800); }
+.photo-overlay-btn.delete { background: var(--danger); color: white; }
+.photo-overlay-btn:hover { transform: scale(1.05); }
+.photo-error-msg {
+    display: none;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: var(--danger-light);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--danger);
+    align-items: center;
+    gap: 6px;
+}
+.photo-error-msg svg { width: 14px; height: 14px; flex-shrink: 0; }
+.photo-upload.has-error .photo-error-msg { display: flex; }
+.photo-upload.has-error .photo-box { border-color: var(--danger); background: #FEF2F2; }
 .photo-overlay {
     position: absolute; inset: 0;
     background: rgba(0,0,0,0.5);
